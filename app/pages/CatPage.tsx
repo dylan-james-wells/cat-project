@@ -16,34 +16,66 @@ export default function CatPage() {
   const [error, setError] = useState<Error | null>(null);
 
   const [phraseInput, setPhraseInput] = useState<string>("");
-  const [phraseQuery, setPhraseQuery] = useState<string>("");
 
   const [tag, setTag] = useState<string>("");
   const [tagOptions, setTagOptions] = useState<Tag[]>([]);
 
   const [cats, setCats] = useState<Cat[]>([]);
 
-  const getCat = useCallback(async (signal: AbortSignal) => {
+  const getCat = useCallback(
+    async (signal: AbortSignal) => {
+      try {
+        const params = new URLSearchParams({
+          tag,
+          phrase: phraseInput,
+        });
+        const res = await fetch(`/api/cat?${params}`, { signal });
+        const data = await res.json();
+
+        setCats((prev) => {
+          return prev.concat(data);
+        });
+      } catch (error) {
+        if (!signal.aborted) {
+          setError(error as Error);
+        }
+      }
+    },
+    [tag, phraseInput],
+  );
+
+  const getTags = useCallback(async (signal: AbortSignal) => {
     try {
-      const res = await fetch("/api/cat", { signal });
-      const data = await res.json();
+      const res = await fetch("/api/tags");
 
-      console.log('data', data)
-
-    //   setCats([data]);
-
-      setCats((prev) => {
-        return prev.concat(data);
-        // if (Array.isArray(cats) && !cats.length) {
-        //   return [data as Cat];
-        // }
-      });
+      if (res.ok) {
+        const data = await res.json();
+        setTagOptions(data)
+      } else if (!signal.aborted) {
+        const error = new Error("Failed to get tags");
+        setError(error);
+        throw error;
+      }
     } catch (error) {
       if (!signal.aborted) {
         setError(error as Error);
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (tagOptions.length) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const retrieveTags = async () => getTags(controller.signal);
+
+    retrieveTags();
+
+    return () => controller.abort();
+  }, [getTags, tagOptions]);
 
   return (
     <div className="w-full flex flex-col align-start flex-1">
@@ -60,6 +92,9 @@ export default function CatPage() {
         tags={tagOptions}
         retrieveCat={getCat}
       />
+      {error ? (
+        <p className="text-red mb-6 mb-6 text-center">{error.message}</p>
+      ) : null}
       <CatGrid cats={cats} />
     </div>
   );
