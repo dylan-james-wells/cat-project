@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 
+import { OrbitProgress } from "react-loading-indicators";
+
 import type { Tag } from "../api/tags/route";
 import type { Cat } from "../api/cat/route";
 
@@ -25,19 +27,29 @@ export default function CatPage() {
   const getCat = useCallback(
     async (signal: AbortSignal) => {
       try {
+        setLoading(true);
+
         const params = new URLSearchParams({
           tag,
           phrase: phraseInput,
         });
         const res = await fetch(`/api/cat?${params}`, { signal });
-        const data = await res.json();
 
-        setCats((prev) => {
-          return prev.concat(data);
-        });
+        if (res.ok) {
+          setError(null);
+          const data = await res.json();
+
+          setCats((prev) => {
+            return prev.concat(data);
+          });
+        }
       } catch (error) {
-        if (!signal.aborted) {
+        if (signal && !signal.aborted) {
           setError(error as Error);
+        }
+      } finally {
+        if (signal && !signal.aborted) {
+          setLoading(false);
         }
       }
     },
@@ -50,7 +62,7 @@ export default function CatPage() {
 
       if (res.ok) {
         const data = await res.json();
-        setTagOptions(data)
+        setTagOptions(data);
       } else if (!signal.aborted) {
         const error = new Error("Failed to get tags");
         setError(error);
@@ -78,7 +90,7 @@ export default function CatPage() {
   }, [getTags, tagOptions]);
 
   return (
-    <div className="w-full flex flex-col align-start flex-1">
+    <div className="w-full flex flex-col align-start flex-1 max-w-[1000px] ml-auto mr-auto">
       <img
         src={LOGO}
         alt="Cat logo"
@@ -91,11 +103,17 @@ export default function CatPage() {
         onTagChange={setTag}
         tags={tagOptions}
         retrieveCat={getCat}
+        selectedTag={tag}
       />
       {error ? (
         <p className="text-red mb-6 mb-6 text-center">{error.message}</p>
       ) : null}
       <CatGrid cats={cats} />
+      {loading ? (
+        <div className="ml-auto mr-auto">
+          <OrbitProgress size="large" color="#EF5A50" />
+        </div>
+      ) : null}
     </div>
   );
 }
