@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 const CAT_ROUTE =
   "https://cataas.com/cat{tagAndOrPhrase}?type=square&position=center&html=false&json=true";
 
-
 export type Cat = {
   id: string;
   tags: string[];
@@ -18,10 +17,6 @@ export async function GET(req: NextRequest) {
     req.nextUrl.searchParams.get("phrase") ?? "",
   );
 
-  console.log('tag = ', tag);
-  console.log('phrase = ', phrase);
-
-
   let route = CAT_ROUTE;
 
   if (tag && phrase) {
@@ -33,8 +28,6 @@ export async function GET(req: NextRequest) {
   } else {
     route = route.replace("{tagAndOrPhrase}", "");
   }
-
-  console.log('route', route);
 
   try {
     const res = await fetch(route);
