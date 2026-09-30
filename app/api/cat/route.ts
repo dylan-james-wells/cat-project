@@ -21,9 +21,9 @@ export async function GET(req: NextRequest) {
 
   if (tag && phrase) {
     route = route.replace("{tagAndOrPhrase}", `/${tag}/says/${phrase}`);
-  } else if (tag && !phrase) {
+  } else if (tag) { 
     route = route.replace("{tagAndOrPhrase}", `/${tag}`);
-  } else if (phrase && !tag) {
+  } else if (phrase) {
     route = route.replace("{tagAndOrPhrase}", `/says/${phrase}`);
   } else {
     route = route.replace("{tagAndOrPhrase}", "");
