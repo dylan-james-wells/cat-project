@@ -1,17 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// https://cataas.com/cat?type=square&position=center&html=false
-
 const CAT_ROUTE =
-  "https://cataas.com/cat/{tag}/says/{phrase}?type=square&position=center&html=false&json=true";
+  "https://cataas.com/cat{tagAndOrPhrase}?type=square&position=center&html=false&json=true";
 
-// {
-//   "id": "rdwsAothSmVMMLjH",
-//   "tags": [],
-//   "created_at": "2022-07-28T23:34:43.032Z",
-//   "url": "https://cataas.com/cat/rdwsAothSmVMMLjH?type=square&position=center",
-//   "mimetype": "image/jpeg"
-// }
 
 export type Cat = {
   id: string;
@@ -22,16 +13,31 @@ export type Cat = {
 };
 
 export async function GET(req: NextRequest) {
-  const tag = req.nextUrl.searchParams.get("tag");
-  const phrase = req.nextUrl.searchParams.get("phrase");
+  const tag = encodeURIComponent(req.nextUrl.searchParams.get("tag") ?? "");
+  const phrase = encodeURIComponent(
+    req.nextUrl.searchParams.get("phrase") ?? "",
+  );
+
+  console.log('tag = ', tag);
+  console.log('phrase = ', phrase);
+
+
+  let route = CAT_ROUTE;
+
+  if (tag && phrase) {
+    route = route.replace("{tagAndOrPhrase}", `/${tag}/says/${phrase}`);
+  } else if (tag && !phrase) {
+    route = route.replace("{tagAndOrPhrase}", `/${tag}`);
+  } else if (phrase && !tag) {
+    route = route.replace("{tagAndOrPhrase}", `/says/${phrase}`);
+  } else {
+    route = route.replace("{tagAndOrPhrase}", "");
+  }
+
+  console.log('route', route);
 
   try {
-    const res = await fetch(
-      CAT_ROUTE.replace(tag ? "{tag}" : "/tag/{tag", tag ? tag : "").replace(
-        phrase ? "{phrase}" : "/says/{phrase",
-        phrase ? phrase : "",
-      ),
-    );
+    const res = await fetch(route);
 
     if (res.ok) {
       const data = await res.json();
