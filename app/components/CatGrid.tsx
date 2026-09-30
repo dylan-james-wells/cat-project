@@ -11,7 +11,7 @@ export default function CatGrid({ cats }: CatGridProps) {
         ? cats.map((cat, i) => (
             // we are adding the index to the key because there seems to be often one cat per tag
             // which causes a duplicate key error
-            <li className="p-4 bg-[#EF5A50] animate-[fadeInUp_0.5s_ease-out_forwards]" key={`${cat.id}-${i}`}>
+            <li key={`${cat.id}-${i}`} className="relative p-4 bg-[#EF5A50] animate-[fadeInUp_0.5s_ease-out_forwards]">
               <img className="w-full" src={cat.url} alt="cat" />
             </li>
           ))
