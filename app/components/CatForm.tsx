@@ -61,6 +61,8 @@ export default function CatForm({
           <button
             className="text-[24px] ml-4 text-[#7A5D58] cursor-pointer"
             onClick={() => onTagChange("")}
+            aria-label="Remove tag"
+            title="Remove tag"
           >
             &times;
           </button>
