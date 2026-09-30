@@ -1,10 +1,11 @@
-import Image from "next/image";
-
-// - $\colorbox{7a5d58}{PRIMARY}$ #7A5D58
-// - $\colorbox{ef5a50}{ACCENT}$ #EF5A50
-// - $\colorbox{d2ac92}{BACKGROUND}$ #D2AC92
-
 import CatPage from "./pages/CatPage";
+
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Cat-alog',
+  description: 'Random cats, with labels!'
+};
 
 export default function Home() {
   return (
