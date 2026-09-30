@@ -2,6 +2,8 @@ import { OrbitProgress } from "react-loading-indicators";
 
 import type { Tag } from "../api/tags/route";
 
+import { useEffect } from "react";
+
 type CatFormProps = {
   onTagChange: (tag: string) => void;
   phraseInput: string;
@@ -20,6 +22,10 @@ export default function CatForm({
   retrieveCat,
 }: CatFormProps) {
   const controller = new AbortController();
+
+  useEffect(() => {
+    return () => controller.abort();
+  });
 
   return (
     <form
@@ -41,9 +47,13 @@ export default function CatForm({
         onChange={(e) => onTagChange(e.target.value)}
       >
         <option>Select a tag</option>
-        {tags.map((tag) => (
-          <option key={tag} value={tag} />
-        ))}
+        {tags.map((tag) =>
+          !tag ? null : (
+            <option key={tag} value={tag}>
+              {tag}
+            </option>
+          ),
+        )}
       </select>
       {loading ? (
         <OrbitProgress size="small" />
