@@ -17,7 +17,7 @@ export default function CatPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const [phraseInput, setPhraseInput] = useState<string>("");
+  const [phrase, setPhrase] = useState<string>("");
 
   const [tag, setTag] = useState<string>("");
   const [tagOptions, setTagOptions] = useState<Tag[]>([]);
@@ -31,7 +31,7 @@ export default function CatPage() {
 
         const params = new URLSearchParams({
           tag,
-          phrase: phraseInput,
+          phrase: phrase,
         });
         const res = await fetch(`/api/cat?${params}`, { signal });
 
@@ -44,21 +44,21 @@ export default function CatPage() {
           });
         }
       } catch (error) {
-        if (signal && !signal.aborted) {
+        if (!signal.aborted) {
           setError(error as Error);
         }
       } finally {
-        if (signal && !signal.aborted) {
+        if (!signal.aborted) {
           setLoading(false);
         }
       }
     },
-    [tag, phraseInput],
+    [tag, phrase],
   );
 
   const getTags = useCallback(async (signal: AbortSignal) => {
     try {
-      const res = await fetch("/api/tags");
+      const res = await fetch("/api/tags", { signal });
 
       if (res.ok) {
         const data = await res.json();
@@ -90,7 +90,7 @@ export default function CatPage() {
   }, [getTags, tagOptions]);
 
   return (
-    <div className="w-full flex flex-col align-start flex-1 max-w-[1000px] ml-auto mr-auto">
+    <div className="w-full flex flex-col align-start flex-1 max-w-[1000px] ml-auto mr-auto relative">
       <img
         src={LOGO}
         alt="Cat logo"
@@ -98,8 +98,8 @@ export default function CatPage() {
       />
       <CatForm
         loading={loading}
-        phraseInput={phraseInput}
-        onPhraseInputChange={setPhraseInput}
+        phrase={phrase}
+        onPhraseChange={setPhrase}
         onTagChange={setTag}
         tags={tagOptions}
         retrieveCat={getCat}
@@ -110,7 +110,7 @@ export default function CatPage() {
       ) : null}
       <CatGrid cats={cats} />
       {loading ? (
-        <div className="ml-auto mr-auto">
+        <div className="absolute w-[100] h-[100] border-box top-[60vh] left-[50%] ml-auto mr-auto translate-x-[-50%] z-1 rounded-full bg-[rgba(255,255,255,0.5)]">
           <OrbitProgress size="large" color="#EF5A50" />
         </div>
       ) : null}
