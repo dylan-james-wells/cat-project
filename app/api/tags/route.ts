@@ -9,8 +9,8 @@ export async function GET() {
     const res = await fetch(TAGS_API);
 
     if (res.ok) {
-        const data = await res.json();
-        return NextResponse.json(data);
+      const data = await res.json();
+      return NextResponse.json(data);
     } else {
       return NextResponse.json(
         { message: "failed to retrieve tags - 1" },
